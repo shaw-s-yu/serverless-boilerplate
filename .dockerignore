@@ -1,0 +1,9 @@
+.build
+package-lock.json
+.github
+.gitignore
+.prettierrc
+docker-compose.yml
+
+# node_modules/
+# yarn.lock

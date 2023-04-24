@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: build
+        run: npm install
+      - name: create env file
+        run: |
+          cp .env.qa .env
+          echo "" >> .env
+          echo \DATABASE_URL=${{ secrets.DATABASE_URL_QA }} >> .env
+          echo \HOST_URL=${{ secrets.HOST_URL_QA}} >> .env
+          echo \DATADOG_SITE=${{ secrets.DATADOG_SITE}} >> .env
+          echo \DATADOG_API_KEY=${{secrets.DATADOG_API_KEY}} >> .env
+          echo \ENV=qa
+      - name: build swagger
+        run: |
+          yarn build
+
+      # Run Unit tests- Specify unit tests here
+
+      - name: deploy
+        run: npx serverless deploy

@@ -1,0 +1,54 @@
+useDotenv: true
+
+service: serverless-template
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+
+functions:
+  healthcheck:
+    handler: src/handlers/healthcheck.handler
+    events:
+      - http:
+          path: /healthcheck
+          # path: /healthcheck/{id} (defines path param)
+          method: get
+          # request:
+          #   parameters:
+          #     paths:
+          #       deviceId: true (ture means required)
+          #   querystrings:
+          #     includeDeleted: false
+          # bodyType: 'DeviceRequest' (body data type displays in swagger, defined in swagger type files)
+
+          # The types to define swagger response
+          responseData:
+            '200':
+              description: '200 response'
+              bodyType: 'DummyResponse'
+
+custom:
+  autoswagger:
+    title: 'string'
+    apiType: 'httpApi'
+    generateSwaggerOnDeploy: true
+    typefiles: ['./src/types/api-types.d.ts']
+    swaggerFiles: []
+    host: ${env:HOST_URL}
+    basePath: '/dev'
+    schemes: ['http', 'https']
+    useRedirectUI: true
+
+plugins:
+  - serverless-auto-swagger2.0
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-plugin-typescript
+  - serverless-plugin-datadog
+package:
+  patterns:
+    - '!node_modules/.prisma/client/libquery_engine-*'
+    - '!node_modules/@prisma/engines/**'
+    - '!node_modules/prisma/libquery_engine-*'
+    - 'node_modules/.prisma/client/libquery_engine-rhel-*'
